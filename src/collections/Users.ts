@@ -4,9 +4,9 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
-    useAPIKey: true,
   },
   auth: true,
+  useAPIKey: true,
   fields: [
     // Email added by default
     // Add more fields as needed
