@@ -2,6 +2,12 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Ensures Payload Lexical / UI client chunks are transpiled for Next + OpenNext (Workers) builds.
+  transpilePackages: [
+    '@payloadcms/next',
+    '@payloadcms/ui',
+    '@payloadcms/richtext-lexical',
+  ],
   images: {
     localPatterns: [
       {

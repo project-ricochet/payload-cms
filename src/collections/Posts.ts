@@ -1,6 +1,5 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { lexicalHasText } from '../utilities/lexicalHasText'
 import { slugify } from '../utilities/slugify'
@@ -39,10 +38,12 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      // Not `required: true`: Lexical's required check treats the default empty
-      // paragraph as invalid. We still require real text when status is published (hook below).
+      label: 'Content',
+      // Inherits `editor: lexicalEditor()` from `payload.config.ts`. Defining another
+      // `lexicalEditor()` here can desync the admin import map and hide the field in production.
+      // Not `required: true`: Lexical treats the default empty paragraph as invalid; we enforce
+      // body text when status is published in `beforeChange` instead.
       required: false,
-      editor: lexicalEditor(),
       admin: {
         description:
           'Drafts may be saved with an empty body. Published posts must include at least one character of body text.',
