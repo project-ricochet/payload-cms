@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
+import { lexicalHasText } from '../utilities/lexicalHasText'
 import { slugify } from '../utilities/slugify'
 
 export const Posts: CollectionConfig = {
@@ -36,7 +39,14 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      required: true,
+      // Not `required: true`: Lexical's required check treats the default empty
+      // paragraph as invalid. We still require real text when status is published (hook below).
+      required: false,
+      editor: lexicalEditor(),
+      admin: {
+        description:
+          'Drafts may be saved with an empty body. Published posts must include at least one character of body text.',
+      },
     },
     {
       name: 'coverImage',
@@ -93,6 +103,28 @@ export const Posts: CollectionConfig = {
             data.slug = slugify(data.title)
           }
         }
+
+        const nextStatus =
+          data.status !== undefined && data.status !== null
+            ? data.status
+            : originalDoc && 'status' in originalDoc
+              ? (originalDoc.status as string)
+              : 'draft'
+
+        const content =
+          data.content !== undefined && data.content !== null
+            ? data.content
+            : originalDoc && 'content' in originalDoc
+              ? originalDoc.content
+              : undefined
+
+        if (nextStatus === 'published' && !lexicalHasText(content)) {
+          throw new APIError(
+            'Add body text to the Content field before publishing, or save as Draft.',
+            400,
+          )
+        }
+
         return data
       },
     ],
